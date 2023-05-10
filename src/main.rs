@@ -1,7 +1,7 @@
 use std::env;
 
-use blaze::tfidf::{build_index, save_index};
-use blaze::utils::get_files_in_folder;
+use blaze::tfidf::{build_index, load_index, save_index};
+use blaze::utils::{get_txt_files_in_folder, should_rebuild_index};
 use blaze::web;
 
 fn main()
@@ -9,48 +9,24 @@ fn main()
     let args: Vec<String> = env::args().collect();
     if args.len() < 2
     {
-        println!("Usage: {} <command>", args[0]);
-        println!("Available commands: help, build, serve");
+        println!("Usage: {} <folder>", args[0]);
         std::process::exit(1);
     }
 
-    match args[1].as_str()
+    let folder = &args[1];
+    let files = get_txt_files_in_folder(folder);
+    let json_name = format!("{folder}.json");
+    let index;
+
+    if should_rebuild_index(&folder)
     {
-        "help" =>
-        {
-            println!("Usage: {} <command>", args[0]);
-            println!("Available commands: help, build, serve");
-            std::process::exit(1);
-        }
-
-        "build" =>
-        {
-            if args.len() < 3
-            {
-                println!("Usage: {} build [folder]", args[0]);
-                std::process::exit(1);
-            }
-
-            let folder = &args[2];
-            let files = get_files_in_folder(folder);
-            let index = build_index(&files);
-            // TODO: specify file path in args
-            save_index(&index, "index.json").unwrap();
-        }
-
-        "serve" =>
-        {
-            let folder = &args[2];
-            let files = get_files_in_folder(folder);
-            let index = build_index(&files);
-            web::serve(&files, &index);
-        }
-
-        _ =>
-        {
-            println!("Invalid command.");
-            println!("Available commands: help, build, serve");
-            std::process::exit(1);
-        }
+        index = build_index(&files);
+        save_index(&index, &json_name).unwrap();
     }
+    else
+    {
+        index = load_index(&json_name).unwrap();
+    }
+
+    web::serve(&files, &index)
 }
