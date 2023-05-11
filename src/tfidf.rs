@@ -2,7 +2,7 @@ use rust_stemmers::{Algorithm, Stemmer};
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{BufReader, BufWriter, Read, Write};
 
 fn tokenize(content: &str, stemmer: &Stemmer) -> Vec<String>
 {
@@ -48,14 +48,17 @@ pub fn build_index(files: &[String]) -> HashMap<String, HashMap<String, f32>>
 
     tfidf
 }
+
 pub fn save_index(
     index: &HashMap<String, HashMap<String, f32>>,
     file_path: &str,
 ) -> Result<(), std::io::Error>
 {
     let json_data = serde_json::to_string(index)?;
-    let mut file = File::create(file_path)?;
-    file.write_all(json_data.as_bytes())?;
+    let file = File::create(file_path)?;
+    let mut buf_writer = BufWriter::new(file);
+    buf_writer.write_all(json_data.as_bytes())?;
+    buf_writer.flush()?;
     println!("Saved index to: {}", file_path);
     Ok(())
 }
@@ -63,9 +66,10 @@ pub fn save_index(
 pub fn load_index(file_path: &str)
     -> Result<HashMap<String, HashMap<String, f32>>, std::io::Error>
 {
-    let mut file = File::open(file_path)?;
+    let file = File::open(file_path)?;
+    let mut buf_reader = BufReader::new(file);
     let mut json_data = String::new();
-    file.read_to_string(&mut json_data)?;
+    buf_reader.read_to_string(&mut json_data)?;
     let index: HashMap<String, HashMap<String, f32>> = serde_json::from_str(&json_data)?;
     Ok(index)
 }

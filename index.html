@@ -92,7 +92,13 @@
       if (results.length === 0) {
         resultsContainer.innerHTML = '<p class="no-matches">No matches found.</p>';
       } else {
+
         for (let result of results) {
+          // check if score is 0, skip this result if true
+          if (result[1] === 0) {
+            continue;
+          }
+
           const div = document.createElement('div');
           div.classList.add('result');
           const p = document.createElement('p');
