@@ -81,62 +81,72 @@
   </div>
 
   <script>
-    let showScores = false;
 
-    async function search(event) {
-      const query = document.getElementById('query').value;
-      const response = await fetch(`/search?q=${query}`);
-      const results = await response.json();
-      const resultsContainer = document.getElementById('results');
-      resultsContainer.innerHTML = '';
-      if (results.length === 0) {
-        resultsContainer.innerHTML = '<p class="no-matches">No matches found.</p>';
-      } else {
+let showScores = false;
 
-        for (let result of results) {
-          // check if score is 0, skip this result if true
-          if (result[1] === 0) {
-            continue;
-          }
+async function search(event) {
+  if (event.type === 'submit') {
+    event.preventDefault();
+  } else if (event.type === 'input' && event.inputType !== 'insertLineBreak') {
+    // Do nothing if input event is fired due to pressing enter
+    return;
+  }
 
-          const div = document.createElement('div');
-          div.classList.add('result');
-          const p = document.createElement('p');
-          const a = document.createElement('a');
-          a.href = `/${result[0]}`;
-          a.textContent = result[0];
-          p.appendChild(a);
-          if (showScores) {
-            p.innerHTML += ` - ${result[1]}`;
-          }
-          div.appendChild(p);
-          div.addEventListener('click', async (event) => {
-            if (div.classList.contains('expanded')) {
-              if (event.target.classList.contains('read-more')) {
-                event.stopPropagation(); // stop event from propagating to parent div
-                return;
-              }
-              div.classList.remove('expanded');
-              div.removeChild(document.getElementById(result[0]));
-            } else {
-              div.classList.add('expanded');
-              const response = await fetch(`/${result[0]}`);
-              const text = await response.text();
-              const pre = document.createElement('pre');
-              pre.id = result[0];
-              const firstFewLines = text.split('\n').slice(0, 5).join('\n');
-              pre.textContent = firstFewLines;
-              div.appendChild(pre);
-            }
-          });
-          resultsContainer.appendChild(div);
-        }
+  const query = document.getElementById('query').value;
+  const response = await fetch(`/search?q=${query}`);
+  const results = await response.json();
+  const resultsContainer = document.getElementById('results');
+  resultsContainer.innerHTML = '';
+  if (results.length === 0) {
+    resultsContainer.innerHTML = '<p class="no-matches">No matches found.</p>';
+  } else {
+
+    for (let result of results) {
+      // check if score is 0, skip this result if true
+      if (result[1] === 0) {
+        continue;
       }
-    }
 
-    const queryInput = document.getElementById('query');
-    queryInput.addEventListener('input', search);
-  </script>
+      const div = document.createElement('div');
+      div.classList.add('result');
+      const p = document.createElement('p');
+      const a = document.createElement('a');
+      a.href = `/${result[0]}`;
+      a.textContent = result[0];
+      p.appendChild(a);
+      if (showScores) {
+        p.innerHTML += ` - ${result[1]}`;
+      }
+      div.appendChild(p);
+      div.addEventListener('click', async (event) => {
+        if (div.classList.contains('expanded')) {
+          if (event.target.classList.contains('read-more')) {
+            event.stopPropagation(); // stop event from propagating to parent div
+            return;
+          }
+          div.classList.remove('expanded');
+          div.removeChild(document.getElementById(result[0]));
+        } else {
+          div.classList.add('expanded');
+          const response = await fetch(`/${result[0]}`);
+          const text = await response.text();
+          const pre = document.createElement('pre');
+          pre.id = result[0];
+          const firstFewLines = text.split('\n').slice(0, 5).join('\n');
+          pre.textContent = firstFewLines;
+          div.appendChild(pre);
+        }
+      });
+      resultsContainer.appendChild(div);
+    }
+  }
+}
+
+const searchForm = document.querySelector('form');
+const queryInput = document.getElementById('query');
+searchForm.addEventListener('submit', search);
+queryInput.addEventListener('input', search);
+ </script>
 </body>
 
 </html>
