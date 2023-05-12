@@ -6,10 +6,18 @@ use std::io::{BufReader, BufWriter, Read, Write};
 
 fn tokenize(content: &str, stemmer: &Stemmer) -> Vec<String>
 {
-    content
-        .split_whitespace()
-        .map(|w| stemmer.stem(w).to_lowercase())
-        .collect()
+    let mut tokens = Vec::new();
+
+    for word in content.split_whitespace()
+    {
+        let clean_word = word.trim_matches(|c: char| !c.is_ascii_alphanumeric());
+        if !clean_word.is_empty()
+        {
+            tokens.push(stemmer.stem(&clean_word).to_string());
+        }
+    }
+
+    tokens
 }
 
 pub fn build_index(files: &[String]) -> HashMap<String, HashMap<String, f32>>
