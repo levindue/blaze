@@ -1,7 +1,7 @@
 use std::env;
 
 use blaze::tfidf::{build_index, load_index, save_index};
-use blaze::utils::{get_txt_files_in_folder, should_rebuild_index};
+use blaze::utils::{get_blaze_files_in_folder, should_rebuild_index};
 use blaze::web;
 
 fn main()
@@ -14,7 +14,7 @@ fn main()
     }
 
     let folder = &args[1];
-    let files = get_txt_files_in_folder(folder);
+    let files = get_blaze_files_in_folder(folder);
     let json_name = format!("{folder}.json");
     let index;
 

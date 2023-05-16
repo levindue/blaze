@@ -1,13 +1,13 @@
 use std::fs;
 use std::path::Path;
 
-pub fn get_txt_files_in_folder(dir_path: &str) -> Vec<String>
+pub fn get_blaze_files_in_folder(dir_path: &str) -> Vec<String>
 {
     let mut files = Vec::new();
 
     for entry in fs::read_dir(dir_path).unwrap().flatten()
     {
-        if let Some("txt") = entry.path().extension().and_then(|ext| ext.to_str())
+        if let Some("blaze") = entry.path().extension().and_then(|ext| ext.to_str())
         {
             files.push(entry.path().to_string_lossy().to_string());
         }
