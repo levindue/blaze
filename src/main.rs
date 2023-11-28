@@ -1,8 +1,8 @@
-use std::env;
+pub mod tfidf;
+pub mod utils;
+pub mod web;
 
-use blaze::tfidf::{build_index, load_index, save_index};
-use blaze::utils::{get_blaze_files_in_folder, should_rebuild_index};
-use blaze::web;
+use std::env;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -12,16 +12,16 @@ fn main() {
     }
 
     let folder = &args[1];
-    let files = get_blaze_files_in_folder(folder);
+    let files = utils::get_text_files_in_folder(folder);
     let json_name = format!("{folder}.json");
-    let index;
 
-    if should_rebuild_index(&folder) {
-        index = build_index(&files);
-        save_index(&index, &json_name).unwrap();
+    let index = if utils::should_rebuild_index(folder) {
+        tfidf::build_index(&files)
     } else {
-        index = load_index(&json_name).unwrap();
-    }
+        tfidf::load_index(&json_name).expect("Failed to load index")
+    };
+
+    tfidf::save_index(&index, &json_name).unwrap();
 
     web::serve(&files, &index)
 }

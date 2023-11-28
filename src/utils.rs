@@ -1,11 +1,11 @@
 use std::fs;
 use std::path::Path;
 
-pub fn get_blaze_files_in_folder(dir_path: &str) -> Vec<String> {
+pub fn get_text_files_in_folder(dir_path: &str) -> Vec<String> {
     let mut files = Vec::new();
 
     for entry in fs::read_dir(dir_path).unwrap().flatten() {
-        if let Some("blaze") = entry.path().extension().and_then(|ext| ext.to_str()) {
+        if let Some("txt") = entry.path().extension().and_then(|ext| ext.to_str()) {
             files.push(entry.path().to_string_lossy().to_string());
         }
     }
@@ -33,12 +33,12 @@ pub fn should_rebuild_index(folder_path: &str) -> bool {
         return true;
     }
 
-    let folder_modified = fs::metadata(&folder_path)
+    let folder_modified = fs::metadata(folder_path)
         .expect("Failed to read folder metadata")
         .modified()
         .expect("Failed to get folder modified time");
 
-    let json_modified = fs::metadata(&json_path)
+    let json_modified = fs::metadata(json_path)
         .expect("Failed to read JSON metadata")
         .modified()
         .expect("Failed to get JSON modified time");

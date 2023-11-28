@@ -10,7 +10,7 @@ fn tokenize(content: &str, stemmer: &Stemmer) -> Vec<String> {
     for word in content.split_whitespace() {
         let clean_word = word.trim_matches(|c: char| !c.is_ascii_alphanumeric());
         if !clean_word.is_empty() {
-            tokens.push(stemmer.stem(&clean_word).to_string());
+            tokens.push(stemmer.stem(clean_word).to_string());
         }
     }
 
@@ -40,7 +40,7 @@ pub fn build_index(files: &[String]) -> HashMap<String, HashMap<String, f32>> {
         }
 
         for (word, freq) in &doc_freq {
-            let entry = tfidf.entry(word.clone()).or_insert(HashMap::new());
+            let entry = tfidf.entry(word.clone()).or_default();
             entry.insert(file_path.clone(), *freq);
         }
     }
